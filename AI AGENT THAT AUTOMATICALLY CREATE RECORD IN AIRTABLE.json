@@ -1,0 +1,325 @@
+{
+  "name": "AI AGENT TO CREATE RECORD IN AIRTABLE",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a data extraction and JSON transformation agent.\n\nYour responsibility is to analyze any text provided by the user and convert it into the required JSON format.\n\n## Rules\n\n1. Return ONLY valid JSON.\n2. Do NOT wrap the JSON in markdown or code blocks.\n3. Do NOT include explanations, notes, or additional text.\n4. Never invent information.\n5. If a field cannot be determined from the input, return an empty string (\"\").\n6. Preserve the meaning of the original input.\n7. If the input contains labels (such as \"Name:\", \"Email:\", \"Phone:\", etc.), remove the labels and extract only the values.\n8. If a field requires a summary (such as taskDetails), create a concise summary while preserving the original meaning.\n9. The output must exactly match the JSON schema provided below.\n10. Give a task name bsed on task details\n\n## JSON Schema\n\n{\n  \"TaskName\": \"Task\",\n  \"taskDetails\": \"<Extracted task description>\",\n  \"firstName\": \"<First name from 'Name:' field>\",\n  \"lastName\": \"<Last name from 'Name:' field>\",\n  \"email\": \"<Email from 'E-mail:' field>\"\n}\n\n## User Input\n\n{{ $json.body.pretty }}\n\nReturn only the completed JSON. ",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -64,
+        -48
+      ],
+      "id": "02f29929-84c4-443e-a0a3-770f546afcfd",
+      "name": "AI Agent",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -208,
+        160
+      ],
+      "id": "309c0f9f-3cb0-4388-a63e-8d9b7ceef7ee",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wJVGikoA9Tfbhtiz",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "1"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -64,
+        160
+      ],
+      "id": "80e4eb0a-52fb-4507-826e-14f95e09f957",
+      "name": "Simple Memory",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "8dc4045a-3f91-4835-ac64-3d3f7e5ee2af",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -256,
+        -48
+      ],
+      "id": "18a55a8d-bbf0-446a-9479-35df88339f09",
+      "name": "Webhook",
+      "webhookId": "8dc4045a-3f91-4835-ac64-3d3f7e5ee2af"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app6zXP7TmSAvJy3q",
+          "mode": "list",
+          "cachedResultName": "Product Team Org Chart",
+          "cachedResultUrl": "https://airtable.com/app6zXP7TmSAvJy3q"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblQl1hlx9SBbcT3M",
+          "mode": "list",
+          "cachedResultName": "Task",
+          "cachedResultUrl": "https://airtable.com/app6zXP7TmSAvJy3q/tblQl1hlx9SBbcT3M"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.output.TaskName }}",
+            "Description": "={{ $json.output.taskDetails }}",
+            "Requestor Email": "={{ $json.output.email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Not Started",
+                  "value": "Not Started"
+                },
+                {
+                  "name": "In Progress",
+                  "value": "In Progress"
+                },
+                {
+                  "name": "On Hold",
+                  "value": "On Hold"
+                },
+                {
+                  "name": "Complete",
+                  "value": "Complete"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Owner",
+              "displayName": "Owner",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Start Date",
+              "displayName": "Start Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Due Date",
+              "displayName": "Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Low",
+                  "value": "Low"
+                },
+                {
+                  "name": "Medium",
+                  "value": "Medium"
+                },
+                {
+                  "name": "High",
+                  "value": "High"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Requestor Email",
+              "displayName": "Requestor Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        -48
+      ],
+      "id": "ae4cea82-f618-467b-a023-d63c82e75fe6",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "pRI6BM3wvqmnwxZ5",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"TaskName\": \"Task\",\n  \"taskDetails\": \"<Extracted task description>\",\n  \"firstName\": \"<First name from 'Name:' field>\",\n  \"lastName\": \"<Last name from 'Name:' field>\",\n  \"email\": \"<Email from 'E-mail:' field>\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        160
+      ],
+      "id": "d774fc5f-2ef9-4c3b-a98d-da107a385cd3",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "1c3d384e-b29e-4505-8f4e-fb86c191c0b9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d84859ff887d51a867c9619bdb15c211b20b184f8313a44b04f5d574bd2cdf9f"
+  },
+  "nodeGroups": [],
+  "id": "jrd7Uj9zAusbhm6S",
+  "tags": []
+}
