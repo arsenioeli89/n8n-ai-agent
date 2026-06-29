@@ -1,3 +1,16 @@
+# Screenshots
+
+## Workflow
+
+![Workflow](screenshots/workflow-overview.png)
+
+## Successful Execution
+
+![Execution](screenshots/workflow-success.png)
+
+## Airtable Result
+
+![Airtable](screenshots/airtable-result.png)
 # AI Agent Automation
 ---
 ## What it does
